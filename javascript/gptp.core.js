@@ -3,6 +3,8 @@ gptp = window.gptp;
 
 gptp.core = (function () {
 
+    let config = null;
+
     function showGPTDialog() {
         gptp.dialog.show({
             title: 'ChatGPT Prompts',
@@ -38,8 +40,18 @@ gptp.core = (function () {
         quickSettings.appendChild(createHeaderButton('ChatGPT Prompts', "✨", className, {}, showGPTDialog));
     }
 
+    function loadConfig() {
+        fetch('/gptp/config.json?_=' + (+new Date()))
+            .then(response => response.json())
+            .then(jsonResponse => {
+                config = jsonResponse;
+            })
+            .catch(error => state.logging.error(error));
+    }
+
     function init() {
         loadUI();
+        loadConfig();
     }
 
     return { init };
