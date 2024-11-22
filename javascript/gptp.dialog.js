@@ -38,10 +38,12 @@ gptp.dialog = (function() {
     }
 
     function close() {
+
         const container = getContainer();
         container.classList.remove('open');
         const modal = container.querySelectorAll(`div.${prefix}-modal`);
         modal.forEach(m => m.parentNode.removeChild(m));
+
         if (onClose && typeof onClose === 'function') {
             onClose();
         }
@@ -57,6 +59,7 @@ gptp.dialog = (function() {
     }
 
     function show(opt) {
+
         onClose = null;
         close();
 
@@ -73,15 +76,19 @@ gptp.dialog = (function() {
         onClose = opt.onClose && typeof opt.onClose === 'function' ? opt.onClose : null;
 
         const container = getContainer();
-        container.insertAdjacentHTML('beforeend', getContent(opt));
+        container.innerHTML = getContent(opt);
 
         const dialogId = `${prefix}-${opt.id}-modal`;
         const dialog = document.getElementById(dialogId);
 
+        dialog.addEventListener('click', event => event.stopPropagation());
+
         if (opt.big || opt.imageSrc) {
+
             const windowHeight = window.innerHeight;
             const minHeight = parseInt(windowHeight * 0.8) - 100;
             const top = parseInt(windowHeight * 0.08);
+
             dialog.style.top = `${top}px`;
             if (!opt.dontStretch) {
                 dialog.querySelector(`.${prefix}-modal-content`).style.minHeight = `${minHeight}px`;
