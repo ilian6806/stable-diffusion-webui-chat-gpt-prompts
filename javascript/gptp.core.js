@@ -8,7 +8,9 @@ gptp.core = (function () {
     function showGPTDialog() {
         gptp.dialog.show({
             title: 'ChatGPT Prompts',
-            content: 'This is a dialog content',
+            content: `
+                <textarea id="gptp-prompt" class="gptp-prompt gptp-textarea" placeholder="Type your prompt topic..."></textarea>
+            `,
             big: true,
             buttons: [
                 {

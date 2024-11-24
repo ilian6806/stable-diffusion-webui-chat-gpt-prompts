@@ -293,7 +293,7 @@ document.addEventListener('DOMContentLoaded', function () {
         padding: 5px 15px;
         margin: 5px 7px;
         background: rgba(255,255,255,.2);
-        color: white;
+        color: rgba(236,236,241,1);
         border: 1px solid black;
         font-size: 16px;
         opacity: 1;
@@ -314,14 +314,23 @@ document.addEventListener('DOMContentLoaded', function () {
         overflow-y: scroll;
     }
 
-    #${prefix}-dialogs-container .${prefix}-modal-content a.simple-link {
-        color: #296fb4;
-    }
-
     #${prefix}-dialogs-container .${prefix}-modal-content::-webkit-scrollbar {
         width: 5px;
         height: 5px;
     }
+
+    #${prefix}-dialogs-container .${prefix}-modal-content input[type="text"],
+    #${prefix}-dialogs-container .${prefix}-modal-content textarea {
+        background-color: rgb(64, 65, 79);
+        border-radius: .375rem;
+        border: none;
+        outline: none;
+        padding: 8px;
+        color: rgba(236,236,241,1);
+        font-size: 16px;
+        box-sizing: border-box;
+    }
     `;
+
     document.head.appendChild(style);
 });
