@@ -2,9 +2,10 @@
 window.gptp = window.gptp || {};
 gptp = window.gptp;
 
-gptp.toast = (function() {
+gptp.toastr = (function() {
 
     const prefix = 'gptp';
+
     const timeout = 3000;
 
     let container = null;
@@ -19,7 +20,6 @@ gptp.toast = (function() {
     }
 
     function createToast(type, message) {
-
         const toast = document.createElement('div');
         toast.className = `${prefix}-toast ${prefix}-${type}`;
         toast.innerHTML = message;
@@ -36,6 +36,10 @@ gptp.toast = (function() {
         const container = getContainer();
         const toast = createToast(type, message);
         container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.classList.add('fade-in');
+        }, 1);
     }
 
     return {
@@ -51,7 +55,7 @@ gptp.toast = (function() {
 document.addEventListener('DOMContentLoaded', function () {
 
     const style = document.createElement('style');
-    const prefix = gptp.toast.getPrefix();
+    const prefix = gptp.toastr.getPrefix();
 
     style.innerHTML = `
 
@@ -71,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function () {
         color: #fff;
         border-radius: 5px;
         box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        opacity: 1;
+        opacity: 0;
         transition: opacity 0.5s;
     }
 
@@ -89,6 +93,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     .${prefix}-info {
         background-color: #2196f3;
+    }
+
+    .${prefix}-toast.fade-in {
+        opacity: 1;
     }
 
     .${prefix}-toast.fade-out {

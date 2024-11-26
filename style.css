@@ -2,3 +2,48 @@
 .gptp-prompt {
     width: 100%;
 }
+
+.gptp-textarea {
+    margin-bottom: 10px;
+}
+
+.gptp-instructions {
+    display: flex;
+    justify-content: end;
+    margin-bottom: 8px;
+    margin-top: -10px;
+}
+
+.gptp-icon {
+    height: 28px;
+    vertical-align: middle;
+    margin: -2px 5px 0 5px;
+    fill: rgb(64, 65, 79);
+    cursor: pointer;
+}
+
+.gptp-scrollbar::-webkit-scrollbar {
+    height: 1rem;
+    width: .5rem
+}
+
+.gptp-scrollbar::-webkit-scrollbar:horizontal {
+    height: .5rem;
+    width: 1rem
+}
+
+.gptp-scrollbar:-webkit-scrollbar-track {
+    background-color: transparent;
+    border-radius: 9999px
+}
+
+.gptp-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(86,88,105,.8);
+    border-color: rgba(255,255,255,1);
+    border-radius: 9999px;
+    border-width: 1px
+}
+
+.gptp-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(172,172,190,1)
+}

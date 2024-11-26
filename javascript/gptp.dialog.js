@@ -9,6 +9,27 @@ gptp.dialog = (function() {
     let mainContainer = null;
     let onClose = null;
 
+    let conatinerMethods = {
+
+        find: function (selector) {
+            if (!mainContainer) {
+                return null;
+            }
+            return mainContainer.querySelector(selector);
+        },
+
+        bindEvents: function (map) {
+            for (let eventType in map) {
+                for (let selector in map[eventType]) {
+                    const handler = map[eventType][selector];
+                    const elements = mainContainer.querySelectorAll(selector);
+                    console.log(elements)
+                    elements.forEach(element => element.addEventListener(eventType, handler));
+                }
+            }
+        }
+    };
+
     function getContainer() {
         if (!mainContainer) {
             mainContainer = document.createElement('div');
@@ -24,7 +45,7 @@ gptp.dialog = (function() {
                 <div class="${prefix}-modal-header">
                     <h5 class="${prefix}-modal-title"></h5>
                 </div>
-                <div id="${prefix}-${opt.id}-modal-content" class="${prefix}-modal-content"></div>
+                <div id="${prefix}-${opt.id}-modal-content" class="${prefix}-modal-content ${prefix}-scrollbar"></div>
                 <div class="${prefix}-modal-footer"></div>
             </div>
         `;
@@ -155,11 +176,11 @@ gptp.dialog = (function() {
             button.addEventListener('click', event => onFooterBtnClick(btnOpt, event));
         });
 
-        return dialog;
+        return conatinerMethods;
     }
 
     function showConfirm(text, action) {
-        show({
+        return show({
             id: 'main-confirmation',
             title: 'Confirmation',
             content: text,
@@ -176,7 +197,7 @@ gptp.dialog = (function() {
     }
 
     function showImage(src, title, buttons, maxWidth) {
-        show({
+        return show({
             id: 'image-dialog',
             imageSrc: src,
             big: true,
@@ -187,7 +208,7 @@ gptp.dialog = (function() {
     }
 
     function showError(message) {
-        show({
+        return show({
             id: 'error-dialog',
             title: 'Error',
             content: message,
@@ -304,7 +325,7 @@ document.addEventListener('DOMContentLoaded', function () {
         opacity: 0.8;
     }
 
-    #${prefix}-dialogs-container .${prefix}-modal-footer button.danger {
+    #${prefix}-dialogs-container .${prefix}-modal-footer button.${prefix}-button-danger {
         background: #df4c73;
     }
 
@@ -327,7 +348,7 @@ document.addEventListener('DOMContentLoaded', function () {
         outline: none;
         padding: 8px;
         color: rgba(236,236,241,1);
-        font-size: 16px;
+        font-size: 14px;
         box-sizing: border-box;
     }
     `;
