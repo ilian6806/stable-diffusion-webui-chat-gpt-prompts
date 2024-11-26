@@ -308,8 +308,18 @@ document.addEventListener('DOMContentLoaded', function () {
         padding: 5px 10px;
     }
 
-    #${prefix}-dialogs-container .${prefix}-modal-footer button {
-        min-width: 40%;
+    #${prefix}-dialogs-container .${prefix}-modal-content {
+        padding: 20px;
+        max-height: 250px;
+        overflow-y: scroll;
+    }
+
+    #${prefix}-dialogs-container .${prefix}-modal-content::-webkit-scrollbar {
+        width: 5px;
+        height: 5px;
+    }
+
+    #${prefix}-dialogs-container button {
         border-radius: 5px;
         padding: 5px 15px;
         margin: 5px 7px;
@@ -321,23 +331,16 @@ document.addEventListener('DOMContentLoaded', function () {
         cursor: pointer;
     }
 
-    #${prefix}-dialogs-container .${prefix}-modal-footer button:hover {
+    #${prefix}-dialogs-container .${prefix}-modal-footer button {
+        min-width: 40%;
+    }
+
+    #${prefix}-dialogs-container button:hover {
         opacity: 0.8;
     }
 
-    #${prefix}-dialogs-container .${prefix}-modal-footer button.${prefix}-button-danger {
+    #${prefix}-dialogs-container button.${prefix}-button-danger {
         background: #df4c73;
-    }
-
-    #${prefix}-dialogs-container .${prefix}-modal-content {
-        padding: 20px;
-        max-height: 250px;
-        overflow-y: scroll;
-    }
-
-    #${prefix}-dialogs-container .${prefix}-modal-content::-webkit-scrollbar {
-        width: 5px;
-        height: 5px;
     }
 
     #${prefix}-dialogs-container .${prefix}-modal-content input[type="text"],

@@ -22,6 +22,14 @@
     cursor: pointer;
 }
 
+.gptp-response-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 5px;
+    padding: 7px 0;
+    border-bottom: 1px solid rgb(64, 65, 79);
+}
+
 .gptp-scrollbar::-webkit-scrollbar {
     height: 1rem;
     width: .5rem

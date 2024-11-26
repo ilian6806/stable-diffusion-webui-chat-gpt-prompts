@@ -5,6 +5,41 @@ gptp.core = (function () {
 
     let config = null;
 
+    const COMPLETIONS_URL = 'https://api.openai.com/v1/chat/completions';
+    const ROLE_TYPE_SYSTEM = 'system';
+    const ROLE_TYPE_USER = 'user';
+
+    const RESPONSE_SCHEMA = {
+        'type': 'json_schema',
+        'json_schema': {
+            'name': 'sd_prompt_response',
+            'strict': true,
+            'schema': {
+                'type': 'object',
+                'properties': {
+                    'success': {
+                        'type': 'boolean'
+                    },
+                    'error': {
+                        'type': 'string'
+                    },
+                    'prompts': {
+                        'type': 'array',
+                        'items': {
+                            'type': 'string',
+                        }
+                    }
+                },
+                'required': [
+                    'success',
+                    'error',
+                    'prompts'
+                ],
+                'additionalProperties': false
+            }
+        }
+    };
+
     const DEFAULT_INSTRUCTIONS = `
         I want you to act as a Stable Diffusion Art Prompt Generator.
         The formula for a prompt is made of parts, the parts are indicated by brackets.
@@ -28,16 +63,69 @@ gptp.core = (function () {
         return text.split('\n').map(line => line.trimStart()).join('\n');
     }
 
-    function doGenerate(e) {
+    async function doGenerate(e) {
 
         let prompt = document.getElementById('gptp-prompt').value;
+        let instructions = document.getElementById('gptp-instructuions').value;
 
         if (!prompt) {
+            gptp.toastr.error('Please provide a prompt');
             return;
         }
 
-        console.log(e);
+        const additionalInstructions = `
+            Return "success": true if the prompt was successful, and "prompts": [array of 5 prompts] if successful.
+            Return "success": false if the prompt was unsuccessful, and "prompts": [] if unsuccessful.
+        `;
+
         console.log(config);
+
+        gptp.loader.show();
+
+        const openAIResponsePromise = await fetch(COMPLETIONS_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${config.gptp_openai_api_key}`
+            },
+            body: JSON.stringify({
+                model: config.gptp_openai_model,
+                messages: [
+                    {
+                        role: ROLE_TYPE_SYSTEM,
+                        content: instructions +  removeLeadingSpaces(additionalInstructions)
+                    }, {
+                        role: ROLE_TYPE_USER,
+                        content: prompt
+                    }
+                ],
+                response_format: RESPONSE_SCHEMA
+            }),
+        });
+
+        const openAIResponse = await openAIResponsePromise.json();
+
+        if (openAIResponse.choices &&
+            openAIResponse.choices[0] &&
+            openAIResponse.choices[0].message &&
+            openAIResponse.choices[0].message.content
+        ) {
+            const content = JSON.parse(openAIResponse.choices[0].message.content);
+            if (content.success) {
+                document.getElementById('gptp-response').innerHTML = content.prompts.map(prompt => `
+                    <div class="gptp-response-row">
+                        <span>${prompt}</span>
+                        <button onclick="gptp.core.applyPrompt(event)">Apply</button>
+                    </div>
+                `).join('');
+            } else {
+                document.getElementById('gptp-response').innerHTML = `
+                    <div class="gptp-reponse-row">${content.error || 'No prompts can be generated.'}</div>
+                `;
+            }
+        }
+
+        gptp.loader.hide();
     }
 
     function toggleInstructions() {
@@ -74,6 +162,7 @@ gptp.core = (function () {
                 </div>
                 <textarea id="gptp-instructuions" class="gptp-prompt gptp-textarea gptp-scrollbar" style="display: none;" rows="20">${removeLeadingSpaces(DEFAULT_INSTRUCTIONS)}</textarea>
                 <textarea id="gptp-prompt" class="gptp-prompt gptp-textarea gptp-scrollbar" placeholder="Type your prompt topic..." rows="4"></textarea>
+                <div id="gptp-response"></div>
             `,
             big: true,
             buttons: [
@@ -86,11 +175,22 @@ gptp.core = (function () {
                     text: 'Cancel'
                 }
             ],
+            onClose: function () {
+                gptp.loader.hide();
+            }
         }).bindEvents({
             click: {
                 '.gptp-instructions-btn': toggleInstructions,
             }
         });
+    }
+
+    function applyPrompt(e) {
+        gptp.dialog.hide();
+        const button = e.target;
+        const previousSibling = button.previousElementSibling;
+        const prompt = previousSibling.textContent;
+        gradioApp().querySelector("#txt2img_prompt textarea").value = prompt;
     }
 
     function createHeaderButton(title, text, className, style, action) {
@@ -128,5 +228,5 @@ gptp.core = (function () {
         loadConfig();
     }
 
-    return { init };
+    return { init, applyPrompt };
 }());
