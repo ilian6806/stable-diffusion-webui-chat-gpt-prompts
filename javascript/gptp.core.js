@@ -6,8 +6,13 @@ gptp.core = (function () {
     let config = null;
 
     const COMPLETIONS_URL = 'https://api.openai.com/v1/chat/completions';
+    const DEEPL_URL = 'gptp/translate';
+
     const ROLE_TYPE_SYSTEM = 'system';
     const ROLE_TYPE_USER = 'user';
+
+    const DISPLAY_NONE = 'none';
+    const DISPLAY_INLINE_BLOCK = 'inline-block';
 
     const RESPONSE_SCHEMA = {
         'type': 'json_schema',
@@ -65,22 +70,51 @@ gptp.core = (function () {
 
     async function doGenerate() {
 
-        let prompt = document.getElementById('gptp-prompt').value;
-        let instructions = document.getElementById('gptp-instructuions').value;
+        let promptElement = document.getElementById('gptp-prompt');
+        let instructionsElement = document.getElementById('gptp-instructuions');
+        let prompt = promptElement.value;
+        let instructions = instructionsElement.value;
 
         if (!prompt) {
             gptp.toastr.error('Please provide a prompt');
             return;
         }
 
+        gptp.loader.show();
+
+        if (isTranslationEnabled()) {
+
+            const deeplResponsePromise = await fetch(DEEPL_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `DeepL-Auth-Key ${config.gptp_deepl_api_key}`
+                },
+                body: JSON.stringify({
+                    'text': prompt,
+                    'target_lang': 'EN'
+                })
+            });
+
+            const deeplResponse = await deeplResponsePromise.json();
+
+            if (deeplResponse.text) {
+                prompt = deeplResponse.text;
+                console.log('Translated prompt:', prompt);
+                promptElement.value = prompt;
+            } else {
+                let error = deeplResponse.error || 'Failed to translate the prompt';
+                console.error(error);
+                gptp.toastr.error(error);
+                gptp.loader.hide();
+                return;
+            }
+        }
+
         const additionalInstructions = `
             Return "success": true if the prompt was successful, and "prompts": [array of 5 prompts] if successful.
             Return "success": false if the prompt was unsuccessful, and "prompts": [] if unsuccessful.
         `;
-
-        console.log(config);
-
-        gptp.loader.show();
 
         const openAIResponsePromise = await fetch(COMPLETIONS_URL, {
             method: 'POST',
@@ -134,33 +168,68 @@ gptp.core = (function () {
         let showBtnOff = document.getElementById('gptp-show-instructions-btn-off');
         let showBtnOn = document.getElementById('gptp-show-instructions-btn-on');
 
-        if (instructions.style.display === 'none') {
-            instructions.style.display = 'inline-block';
-            showBtnOff.style.display = 'none';
-            showBtnOn.style.display = 'inline-block';
+        if (instructions.style.display === DISPLAY_NONE) {
+            instructions.style.display = DISPLAY_INLINE_BLOCK;
+            showBtnOff.style.display = DISPLAY_NONE;
+            showBtnOn.style.display = DISPLAY_INLINE_BLOCK;
         } else {
-            instructions.style.display = 'none';
-            showBtnOff.style.display = 'inline-block';
-            showBtnOn.style.display = 'none';
+            instructions.style.display = DISPLAY_NONE;
+            showBtnOff.style.display = DISPLAY_INLINE_BLOCK;
+            showBtnOn.style.display = DISPLAY_NONE;
         }
+
+        gptp.cache.set('toggle-instructions', showBtnOn.style.display === DISPLAY_INLINE_BLOCK ? 1 : 0);
+    }
+
+    function toggleTranslation() {
+
+        let translateBtnOff = document.getElementById('gptp-show-translation-btn-off');
+        let translateBtnOn = document.getElementById('gptp-show-translation-btn-on');
+
+        if (translateBtnOff.style.display === DISPLAY_NONE) {
+            translateBtnOff.style.display = DISPLAY_INLINE_BLOCK;
+            translateBtnOn.style.display = DISPLAY_NONE;
+        } else {
+            translateBtnOff.style.display = DISPLAY_NONE;
+            translateBtnOn.style.display = DISPLAY_INLINE_BLOCK;
+        }
+
+        gptp.cache.set('toggle-translation', translateBtnOn.style.display === DISPLAY_INLINE_BLOCK ? 1 : 0);
+    }
+
+    function isTranslationEnabled() {
+        return document.getElementById('gptp-show-translation-btn-on').style.display === DISPLAY_INLINE_BLOCK;
     }
 
     function showGPTDialog() {
+
         let content = {
             instructions: gptp.cache.get('instructions') || removeLeadingSpaces(DEFAULT_INSTRUCTIONS),
             prompt: gptp.cache.get('prompt') || '',
             response: gptp.cache.get('response') || ''
         };
+
+        let translateSwithchDisplay = config.gptp_deepl_api_key ? 'inline-block' : 'none';
+
         gptp.dialog.show({
             title: 'ChatGPT Prompts',
             content: `
                 <div class="gptp-instructions">
                     <div>
+                        <div style="display: ${translateSwithchDisplay}">
+                            <span>Translate Prompt</span>
+                            <svg id="gptp-show-translation-btn-on" class="gptp-icon gptp-translation-btn" style="display: none;"  viewBox="0 0 576 512">
+                                <path d="M192 64C86 64 0 150 0 256S86 448 192 448l192 0c106 0 192-86 192-192s-86-192-192-192L192 64zm192 96a96 96 0 1 1 0 192 96 96 0 1 1 0-192z"/>
+                            </svg>
+                            <svg id="gptp-show-translation-btn-off" class="gptp-icon gptp-translation-btn" viewBox="0 0 576 512">
+                                <path d="M384 128c70.7 0 128 57.3 128 128s-57.3 128-128 128l-192 0c-70.7 0-128-57.3-128-128s57.3-128 128-128l192 0zM576 256c0-106-86-192-192-192L192 64C86 64 0 150 0 256S86 448 192 448l192 0c106 0 192-86 192-192zM192 352a96 96 0 1 0 0-192 96 96 0 1 0 0 192z"/>
+                            </svg>
+                        </div>
                         <span>Show Instructions</span>
-                        <svg id="gptp-show-instructions-btn-on" class="gptp-icon gptp-instructions-btn" viewBox="0 0 576 512">
+                        <svg id="gptp-show-instructions-btn-on" class="gptp-icon gptp-instructions-btn" style="display: none;" viewBox="0 0 576 512">
                             <path d="M192 64C86 64 0 150 0 256S86 448 192 448l192 0c106 0 192-86 192-192s-86-192-192-192L192 64zm192 96a96 96 0 1 1 0 192 96 96 0 1 1 0-192z"/>
                         </svg>
-                        <svg id="gptp-show-instructions-btn-off" class="gptp-icon gptp-instructions-btn" style="display: none;" viewBox="0 0 576 512">
+                        <svg id="gptp-show-instructions-btn-off" class="gptp-icon gptp-instructions-btn" viewBox="0 0 576 512">
                             <path d="M384 128c70.7 0 128 57.3 128 128s-57.3 128-128 128l-192 0c-70.7 0-128-57.3-128-128s57.3-128 128-128l192 0zM576 256c0-106-86-192-192-192L192 64C86 64 0 150 0 256S86 448 192 448l192 0c106 0 192-86 192-192zM192 352a96 96 0 1 0 0-192 96 96 0 1 0 0 192z"/>
                         </svg>
                     </div>
@@ -189,6 +258,7 @@ gptp.core = (function () {
         }).bindEvents({
             click: {
                 '.gptp-instructions-btn': toggleInstructions,
+                '.gptp-translation-btn': toggleTranslation
             },
             input: {
                 '.gptp-prompt': function () {
@@ -199,6 +269,12 @@ gptp.core = (function () {
                 }
             }
         });
+        if (gptp.cache.get('toggle-instructions')) {
+            toggleInstructions();
+        }
+        if (gptp.cache.get('toggle-translation')) {
+            toggleTranslation();
+        }
     }
 
     function applyPrompt(e) {
