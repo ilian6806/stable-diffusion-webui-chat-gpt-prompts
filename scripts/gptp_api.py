@@ -40,7 +40,7 @@ class GptpApi():
             method='POST',
             headers={
                 'Content-Type': 'application/json',
-                'Authorization': f'DeepL-Auth-Key {shared.opts.gptp_deepl_api_key}'
+                'Authorization': f'DeepL-Auth-Key {shared.opts.gptp_deepl_api_key.strip()}'
             },
             data=json.dumps({
                 'text': [translation_request.text],

@@ -139,6 +139,17 @@ gptp.core = (function () {
 
         const openAIResponse = await openAIResponsePromise.json();
 
+        if (!openAIResponsePromise.ok) {
+            let error = 'Failed to generate prompts';
+            if (openAIResponse.error) {
+                error = openAIResponse.error.message || openAIResponse.error;
+            }
+            console.error(error);
+            gptp.toastr.error(error);
+            gptp.loader.hide();
+            return;
+        }
+
         if (openAIResponse.choices &&
             openAIResponse.choices[0] &&
             openAIResponse.choices[0].message &&
@@ -198,7 +209,11 @@ gptp.core = (function () {
     }
 
     function isTranslationEnabled() {
-        return document.getElementById('gptp-show-translation-btn-on').style.display === DISPLAY_INLINE_BLOCK;
+        return (
+            config.gptp_deepl_api_key &&
+            config.gptp_deepl_api_key.trim().length &&
+            document.getElementById('gptp-show-translation-btn-on').style.display === DISPLAY_INLINE_BLOCK
+        );
     }
 
     function showGPTDialog() {
@@ -209,7 +224,7 @@ gptp.core = (function () {
             response: gptp.cache.get('response') || ''
         };
 
-        let translateSwithchDisplay = config.gptp_deepl_api_key ? 'inline-block' : 'none';
+        let translateSwithchDisplay = config.gptp_deepl_api_key.trim().length ? 'inline-block' : 'none';
 
         gptp.dialog.show({
             title: 'ChatGPT Prompts',

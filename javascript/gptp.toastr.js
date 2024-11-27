@@ -7,6 +7,12 @@ gptp.toastr = (function() {
     const prefix = 'gptp';
 
     const timeout = 3000;
+    const timeoutLong = 6000;
+
+    const TOAST_TYPE_SUCCESS = 'success';
+    const TOAST_TYPE_ERROR = 'error';
+    const TOAST_TYPE_WARNING = 'warning';
+    const TOAST_TYPE_INFO = 'info';
 
     let container = null;
 
@@ -27,7 +33,7 @@ gptp.toastr = (function() {
         setTimeout(() => {
             toast.classList.add('fade-out');
             setTimeout(() => toast.remove(), 500);
-        }, timeout);
+        }, type === TOAST_TYPE_ERROR ? timeoutLong : timeout);
 
         return toast;
     }
@@ -44,10 +50,10 @@ gptp.toastr = (function() {
 
     return {
         getPrefix: () => prefix,
-        success: (msg) => showToast('success', msg),
-        error: (msg) => showToast('error', msg),
-        warning: (msg) => showToast('warning', msg),
-        info: (msg) => showToast('info', msg)
+        success: (msg) => showToast(TOAST_TYPE_SUCCESS, msg),
+        error: (msg) => showToast(TOAST_TYPE_ERROR, msg),
+        warning: (msg) => showToast(TOAST_TYPE_WARNING, msg),
+        info: (msg) => showToast(TOAST_TYPE_INFO, msg)
     };
 
 })();
@@ -67,6 +73,8 @@ document.addEventListener('DOMContentLoaded', function () {
         display: flex;
         flex-direction: column;
         gap: 10px;
+        max-width: 400px;
+        overflow-x: hidden;
     }
 
     .${prefix}-toast {

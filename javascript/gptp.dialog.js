@@ -24,7 +24,6 @@ gptp.dialog = (function() {
                 for (let selector in map[eventType]) {
                     const handler = map[eventType][selector];
                     const elements = mainContainer.querySelectorAll(selector);
-                    console.log(elements)
                     elements.forEach(element => element.addEventListener(eventType, handler));
                 }
             }
