@@ -8,6 +8,7 @@ gptp.dialog = (function() {
 
     let mainContainer = null;
     let onClose = null;
+    let onBeforeClose = null;
 
     let conatinerMethods = {
 
@@ -60,6 +61,10 @@ gptp.dialog = (function() {
 
     function close() {
 
+        if (onBeforeClose && typeof onBeforeClose === 'function') {
+            onBeforeClose();
+        }
+
         const container = getContainer();
         container.classList.remove('open');
         const modal = container.querySelectorAll(`div.${prefix}-modal`);
@@ -82,6 +87,7 @@ gptp.dialog = (function() {
     function show(opt) {
 
         onClose = null;
+        onBeforeClose = null;
         close();
 
         if (typeof opt === 'string') {
@@ -95,6 +101,7 @@ gptp.dialog = (function() {
         }
 
         onClose = opt.onClose && typeof opt.onClose === 'function' ? opt.onClose : null;
+        onBeforeClose = opt.onBeforeClose && typeof opt.onBeforeClose === 'function' ? opt.onBeforeClose : null;
 
         const container = getContainer();
         container.innerHTML = getContent(opt);

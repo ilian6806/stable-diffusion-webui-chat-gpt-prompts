@@ -68,8 +68,8 @@ document.addEventListener('DOMContentLoaded', function () {
         border-radius: 50%;
         position: absolute;
         border: calc(45px * 0.05) solid transparent;
-        border-top-color: rgb(172, 172, 190);
-        border-left-color: rgb(172, 172, 190);
+        border-top-color: rgb(64, 65, 79);
+        border-left-color: rgb(64, 65, 79);
         animation: ${prefix}-spinner-animation 2s infinite;
     }
 

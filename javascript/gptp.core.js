@@ -63,7 +63,7 @@ gptp.core = (function () {
         return text.split('\n').map(line => line.trimStart()).join('\n');
     }
 
-    async function doGenerate(e) {
+    async function doGenerate() {
 
         let prompt = document.getElementById('gptp-prompt').value;
         let instructions = document.getElementById('gptp-instructuions').value;
@@ -146,6 +146,11 @@ gptp.core = (function () {
     }
 
     function showGPTDialog() {
+        let content = {
+            instructions: gptp.cache.get('instructions') || removeLeadingSpaces(DEFAULT_INSTRUCTIONS),
+            prompt: gptp.cache.get('prompt') || '',
+            response: gptp.cache.get('response') || ''
+        };
         gptp.dialog.show({
             title: 'ChatGPT Prompts',
             content: `
@@ -160,9 +165,9 @@ gptp.core = (function () {
                         </svg>
                     </div>
                 </div>
-                <textarea id="gptp-instructuions" class="gptp-prompt gptp-textarea gptp-scrollbar" style="display: none;" rows="20">${removeLeadingSpaces(DEFAULT_INSTRUCTIONS)}</textarea>
-                <textarea id="gptp-prompt" class="gptp-prompt gptp-textarea gptp-scrollbar" placeholder="Type your prompt topic..." rows="4"></textarea>
-                <div id="gptp-response"></div>
+                <textarea id="gptp-instructuions" class="gptp-prompt gptp-textarea gptp-scrollbar" style="display: none;" rows="20">${content.instructions}</textarea>
+                <textarea id="gptp-prompt" class="gptp-prompt gptp-textarea gptp-scrollbar" placeholder="Type your prompt topic..." rows="4">${content.prompt}</textarea>
+                <div id="gptp-response">${content.response}</div>
             `,
             big: true,
             buttons: [
@@ -175,12 +180,23 @@ gptp.core = (function () {
                     text: 'Cancel'
                 }
             ],
-            onClose: function () {
+            onBeforeClose: function () {
                 gptp.loader.hide();
+                gptp.cache.set('instructions', document.getElementById('gptp-instructuions').value);
+                gptp.cache.set('response', document.getElementById('gptp-response').innerHTML);
+                gptp.cache.set('prompt', document.getElementById('gptp-prompt').value);
             }
         }).bindEvents({
             click: {
                 '.gptp-instructions-btn': toggleInstructions,
+            },
+            input: {
+                '.gptp-prompt': function () {
+                    gptp.cache.set('prompt', this.value);
+                },
+                '.gptp-instructuions': function () {
+                    gptp.cache.set('instructions', this.value);
+                }
             }
         });
     }
