@@ -302,7 +302,7 @@ gptp.core = (function () {
 
     function createHeaderButton(title, text, className, style, action) {
 
-        const button = state.utils.html.create('button', {
+        const button = gptp.utils.html.create('button', {
             title: title,
             innerHTML: text,
             className: className,
@@ -327,7 +327,7 @@ gptp.core = (function () {
             .then(jsonResponse => {
                 config = jsonResponse;
             })
-            .catch(error => state.logging.error(error));
+            .catch(error => gptp.logging.error(error));
     }
 
     function init() {
