@@ -50,7 +50,7 @@ gptp.loader = (function() {
 document.addEventListener('DOMContentLoaded', function () {
 
     const style = document.createElement('style');
-    const prefix = gptp.dialog.getPrefix();
+    const prefix = gptp.loader.getPrefix();
 
     style.innerHTML = `
 

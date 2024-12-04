@@ -1,4 +1,4 @@
-window.state = window.gptp || {};
+window.gptp = window.gptp || {};
 gptp = window.gptp;
 
 gptp.logging = {
