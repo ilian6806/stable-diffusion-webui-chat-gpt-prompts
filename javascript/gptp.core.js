@@ -297,7 +297,9 @@ gptp.core = (function () {
         const button = e.target;
         const previousSibling = button.previousElementSibling;
         const prompt = previousSibling.textContent;
-        gradioApp().querySelector("#txt2img_prompt textarea").value = prompt;
+        const element = gradioApp().querySelector("#txt2img_prompt textarea");
+        gptp.utils.setValue(element, prompt, 'input');
+        gptp.utils.setValue(element, prompt, 'change');
     }
 
     function createHeaderButton(title, text, className, style, action) {
