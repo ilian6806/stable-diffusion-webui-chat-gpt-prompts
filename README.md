@@ -24,6 +24,8 @@ Use *Install from URL* option with this repo url.
 None at all.
 
 ### Demo
+Demo video: [https://www.youtube.com/watch?v=zz_pok7smjY](https://www.youtube.com/watch?v=zz_pok7smjY)
+
 <img width="1024" src="https://raw.githubusercontent.com/ilian6806/stable-diffusion-webui-chat-gpt-prompts/master/static/images/screenshot.png" alt="">
 
 ### Contributing

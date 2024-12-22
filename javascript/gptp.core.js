@@ -3,8 +3,6 @@ gptp = window.gptp;
 
 gptp.core = (function () {
 
-    let config = null;
-
     const COMPLETIONS_URL = 'https://api.openai.com/v1/chat/completions';
     const DEEPL_URL = 'gptp/translate';
 
@@ -88,7 +86,7 @@ gptp.core = (function () {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `DeepL-Auth-Key ${config.gptp_deepl_api_key}`
+                    'Authorization': `DeepL-Auth-Key ${opts.gptp_deepl_api_key}`
                 },
                 body: JSON.stringify({
                     'text': prompt,
@@ -120,10 +118,10 @@ gptp.core = (function () {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${config.gptp_openai_api_key}`
+                'Authorization': `Bearer ${opts.gptp_openai_api_key}`
             },
             body: JSON.stringify({
-                model: config.gptp_openai_model,
+                model: opts.gptp_openai_model,
                 messages: [
                     {
                         role: ROLE_TYPE_SYSTEM,
@@ -210,13 +208,38 @@ gptp.core = (function () {
 
     function isTranslationEnabled() {
         return (
-            config.gptp_deepl_api_key &&
-            config.gptp_deepl_api_key.trim().length &&
+            opts.gptp_deepl_api_key &&
+            opts.gptp_deepl_api_key.trim().length &&
             document.getElementById('gptp-show-translation-btn-on').style.display === DISPLAY_INLINE_BLOCK
         );
     }
 
+    function showMissingAPIKeyDialog() {
+        gptp.dialog.show({
+            title: 'OpenAI API Key Required',
+            content: `
+                Please provide an OpenAI API key in the extension settings to use this feature.
+                You can find documentation on how to get an API key bellow.
+            `,
+            buttons: [
+                {
+                    text: 'Documentation',
+                    action: function () {
+                        window.open('https://github.com/ilian6806/stable-diffusion-webui-chat-gpt-prompts/wiki', '_blank');
+                    }
+                }, {
+                    text: 'Close'
+                }
+            ]
+        });
+    }
+
     function showGPTDialog() {
+
+        if (!opts.gptp_openai_api_key || !opts.gptp_openai_api_key.trim().length) {
+            showMissingAPIKeyDialog();
+            return;
+        }
 
         let content = {
             instructions: gptp.cache.get('instructions') || removeLeadingSpaces(DEFAULT_INSTRUCTIONS),
@@ -224,7 +247,7 @@ gptp.core = (function () {
             response: gptp.cache.get('response') || ''
         };
 
-        let translateSwithchDisplay = config.gptp_deepl_api_key.trim().length ? 'inline-block' : 'none';
+        let translateSwithchDisplay = opts.gptp_deepl_api_key.trim().length ? 'inline-block' : 'none';
 
         gptp.dialog.show({
             title: 'ChatGPT Prompts',
@@ -323,18 +346,8 @@ gptp.core = (function () {
         quickSettings.appendChild(createHeaderButton('ChatGPT Prompts', "✨", className, {}, showGPTDialog));
     }
 
-    function loadConfig() {
-        fetch('/gptp/config.json?_=' + (+new Date()))
-            .then(response => response.json())
-            .then(jsonResponse => {
-                config = jsonResponse;
-            })
-            .catch(error => gptp.logging.error(error));
-    }
-
     function init() {
         loadUI();
-        loadConfig();
     }
 
     return { init, applyPrompt };
